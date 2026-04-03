@@ -5,7 +5,7 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local Library = { Toggled = true, Accent = Color3.fromRGB(160, 60, 255) }
+local Library = { Toggled = true, Accent = Color3.fromRGB(160, 60, 255), _blockDrag = false }
 
 -- Lucide Icons (from dawid-scripts/Fluent verified asset IDs)
 local Icons = {
@@ -42,7 +42,7 @@ end
 function Library:MakeDraggable(gui)
     local drag, dStart, sPos
     gui.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        if i.UserInputType == Enum.UserInputType.MouseButton1 and not Library._blockDrag then
             drag = true; dStart = i.Position; sPos = gui.Position
             i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then drag = false end end)
         end
@@ -378,8 +378,8 @@ function Library:CreateWindow(title)
                         Val.Text = tostring(val)
                         cb(val)
                     end
-                    Bar.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true; move(i) end end)
-                    UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = false end end)
+                    Bar.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = true; Library._blockDrag = true; move(i) end end)
+                    UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dragging = false; Library._blockDrag = false end end)
                     UIS.InputChanged:Connect(function(i) if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then move(i) end end)
                     return { Set = function(_, v) local p = (v - min)/(max - min); Fill.Size = UDim2.new(p, 0, 1, 0); Val.Text = tostring(v); cb(v) end }
                 end
